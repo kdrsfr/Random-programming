@@ -1,0 +1,48 @@
+"""Oynadığım metin tabanlı bir oyunda 1 dakikada bir görev yapma şansım var bu zamanı daha kolay takip edebilmek için ve deneyim
+kazanmak için aklıma böyle bir program yazmak geldi. Program çalıştırıldığı andan itibaren sürekli klavyede basılan tuşları
+takip ediyor ve belirli bir kombinasyon girildiğinde sayaç başlatıyor. Programı yazmam import etmekte yaşadığım sorunlar da dahil
+olmak üzere 5 saat civarımı aldı :D"""
+
+import PyHook3
+import pythoncom
+from tkinter import *
+from tkinter import messagebox
+import tkinter as tk
+import time
+
+dizi = []
+beklenen ="RPGSpaceHUNTReturn" #sayacın başlaması için beklenen tuş kombinasyonu
+
+pencere = Tk()
+pencere.geometry("250x250")
+yazi=Label(pencere)
+yazi.pack()
+
+def klavye(olay):
+    print("pencere adı :", olay.WindowName) #tuşun basıldığı pencereyi döndüren fonksiyon
+    print("Tuş :", olay.Key) #basılan tuşun hangi tuş olduğunu döndüren fonksiyon
+    dizi.append(olay.GetKey()) #basılan tuşu diziye atan fonksiyon
+    print(dizi)# diziye atılan harflerin doğru bir şekilde atıldığına emin olmak için koyuldu silinebilir
+    print("-----")
+
+    harfler = ""#basılan tuşları birleştirmek için boş bir string
+    for i in dizi:
+        harfler += i#burada her tuşa basıldığında listedeki parametreleri birleştiriyor ve onu değişkene veriyor
+    def gerisayım(say):
+                # text lable'ı bir değişkene atadık
+                yazi['text'] = say 
+
+                if say > 0:
+                    # 1000ms = 1sn yani 1sn gecikme ile sayacı 1 azaltıyor. Eğer burada time modülünden time.sleep
+                    # kullansaydık tüm kodu 1sn durduracağı için program bozuk çalışacaktı.
+                    pencere.after(1000, gerisayım, say-1)
+
+    if beklenen in harfler:#eğer beklenen kombinasyon listedeki parametrelerin birleştirildiği değişkende varsa buraya geçiliyor.
+        dizi.clear()#dizi gereksiz yer kaplamaması için siliniyor.
+        gerisayım(60)#istenen geri sayım fonksiyon çağırılarak başlatılıyor.
+    return True
+hm= PyHook3.HookManager()
+hm.KeyDown= klavye
+hm.HookKeyboard()
+pencere.mainloop()
+pythoncom.PumpMessages()
